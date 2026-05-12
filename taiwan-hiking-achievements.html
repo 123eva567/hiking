@@ -1,0 +1,730 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>山岳成就紀錄 — 台灣登山</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+TC:wght@300;400;600;700&family=Noto+Sans+TC:wght@300;400;500&family=DM+Serif+Display:ital@0;1&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root {
+    --ink:#1a1a18;--paper:#f5f0e8;--moss:#4a6741;--moss-l:#6b8f62;
+    --stone:#8a7968;--stone-l:#b5a99a;--mist:#d4cfc7;--cloud:#e8e4dc;
+    --gold:#c4963a;--peak:#2d4a3e;--mid-c:#5c4a3a;--sm-c:#7a6248;--danger:#8b3a3a;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{background:var(--paper);color:var(--ink);font-family:'Noto Sans TC',sans-serif;min-height:100vh;overflow-x:hidden;}
+  body::before{content:'';position:fixed;inset:0;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");pointer-events:none;z-index:0;}
+  header{position:relative;background:var(--peak);overflow:hidden;}
+  .hbg{position:absolute;inset:0;background:linear-gradient(160deg,#1d3328 0%,#2d4a3e 55%,#1a2e28 100%);}
+  .msvg{position:absolute;bottom:0;left:0;right:0;height:80px;opacity:.12;}
+  .hi{position:relative;z-index:1;max-width:1100px;margin:0 auto;padding:36px 32px 28px;display:flex;align-items:flex-end;justify-content:space-between;flex-wrap:wrap;gap:20px;}
+  .st{font-family:'Noto Serif TC',serif;color:#e8e4d8;font-size:clamp(24px,4vw,40px);font-weight:300;letter-spacing:.12em;line-height:1.1;}
+  .st span{display:block;font-size:.38em;letter-spacing:.3em;color:#8ab88a;font-weight:300;margin-bottom:6px;font-family:'DM Serif Display',serif;font-style:italic;}
+  .hs{display:flex;gap:24px;align-items:flex-end;}
+  .hstat{text-align:center;}
+  .hn{font-family:'DM Serif Display',serif;font-size:34px;color:#e8e4d8;line-height:1;}
+  .hl{font-size:10px;color:#7aaa7a;letter-spacing:.2em;text-transform:uppercase;margin-top:3px;}
+  .hdv{width:1px;height:36px;background:rgba(255,255,255,.12);align-self:center;}
+  .nav-tabs{position:sticky;top:0;z-index:100;background:var(--peak);border-bottom:1px solid rgba(255,255,255,.07);box-shadow:0 2px 20px rgba(0,0,0,.22);}
+  .ni{max-width:1100px;margin:0 auto;padding:0 32px;display:flex;overflow-x:auto;scrollbar-width:none;}
+  .ni::-webkit-scrollbar{display:none;}
+  .tb{padding:14px 22px;border:none;background:transparent;cursor:pointer;font-family:'Noto Sans TC',sans-serif;font-size:13px;letter-spacing:.08em;color:rgba(200,210,200,.55);position:relative;transition:color .2s;white-space:nowrap;flex-shrink:0;}
+  .tb::after{content:'';position:absolute;bottom:0;left:12px;right:12px;height:2px;background:#8ab88a;transform:scaleX(0);transition:transform .2s;}
+  .tb:hover{color:rgba(200,210,200,.85);}
+  .tb.active{color:#e8e4d8;}
+  .tb.active::after{transform:scaleX(1);}
+  .tbadge{display:inline-flex;align-items:center;justify-content:center;min-width:19px;height:19px;padding:0 4px;background:rgba(138,184,138,.18);color:#8ab88a;border-radius:10px;font-size:10px;margin-left:6px;}
+  .tb.active .tbadge{background:#4a6741;color:#e8e4d8;}
+  main{max-width:1100px;margin:0 auto;padding:30px 32px 60px;position:relative;z-index:1;}
+  .ps{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:30px;}
+  .pc{background:#fff;border-radius:12px;padding:20px;box-shadow:0 1px 3px rgba(0,0,0,.05),0 4px 14px rgba(0,0,0,.04);border:1px solid var(--mist);display:flex;align-items:center;gap:16px;transition:box-shadow .2s,transform .2s;animation:fu .5s ease both;}
+  .pc:hover{box-shadow:0 4px 24px rgba(0,0,0,.09);transform:translateY(-2px);}
+  .rw{position:relative;width:66px;height:66px;flex-shrink:0;}
+  .rw svg{transform:rotate(-90deg);}
+  .rbg{fill:none;stroke:var(--cloud);stroke-width:6;}
+  .rfg{fill:none;stroke-width:6;stroke-linecap:round;transition:stroke-dashoffset 1.2s cubic-bezier(.4,0,.2,1);}
+  .rp .rfg{stroke:var(--moss);}
+  .rm .rfg{stroke:var(--mid-c);}
+  .rs .rfg{stroke:var(--sm-c);}
+  .rc{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+  .rn{font-family:'DM Serif Display',serif;font-size:19px;line-height:1;color:var(--ink);}
+  .rd{font-size:9px;color:var(--stone);}
+  .pi h3{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;color:var(--ink);margin-bottom:3px;}
+  .pi .pp{font-size:11px;color:var(--stone);}
+  .pi .pp strong{color:var(--moss);font-size:13px;}
+  .pb{height:3px;background:var(--cloud);border-radius:2px;margin-top:7px;overflow:hidden;width:105px;}
+  .pf{height:100%;border-radius:2px;transition:width 1.2s cubic-bezier(.4,0,.2,1);}
+  .toolbar{display:flex;align-items:center;gap:9px;margin-bottom:18px;flex-wrap:wrap;}
+  .sb{flex:1;min-width:170px;position:relative;}
+  .sb input{width:100%;padding:9px 13px 9px 36px;border:1px solid var(--mist);border-radius:8px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:13px;color:var(--ink);outline:none;transition:border-color .2s,box-shadow .2s;}
+  .sb input:focus{border-color:var(--moss-l);box-shadow:0 0 0 3px rgba(74,103,65,.1);}
+  .si{position:absolute;left:10px;top:50%;transform:translateY(-50%);color:var(--stone-l);font-size:14px;pointer-events:none;}
+  .fbs{display:flex;gap:5px;}
+  .fb{padding:7px 12px;border:1px solid var(--mist);border-radius:8px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--stone);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .fb:hover{border-color:var(--moss-l);color:var(--moss);}
+  .fb.active{background:var(--moss);border-color:var(--moss);color:#fff;}
+  .cl{font-size:11px;color:var(--stone);white-space:nowrap;}
+  .pdfb{padding:7px 14px;border:1px solid var(--gold);border-radius:8px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--gold);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .pdfb:hover{background:var(--gold);color:#fff;}
+  .sh{display:flex;align-items:center;gap:12px;margin-bottom:16px;}
+  .sl{font-family:'Noto Serif TC',serif;font-size:11px;letter-spacing:.25em;text-transform:uppercase;color:var(--stone);white-space:nowrap;}
+  .sln{flex:1;height:1px;background:var(--mist);}
+  .mg{display:grid;grid-template-columns:repeat(auto-fill,minmax(152px,1fr));gap:8px;}
+  .mc{background:#fff;border:1px solid var(--mist);border-radius:10px;padding:12px 12px 10px;cursor:pointer;transition:all .15s;position:relative;overflow:hidden;user-select:none;animation:fu .4s ease both;}
+  .mc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--mist);transition:background .2s;}
+  .mc:hover{border-color:var(--stone-l);box-shadow:0 4px 14px rgba(0,0,0,.08);transform:translateY(-2px);}
+  .mc.climbed{background:#f0f5ee;border-color:#b8d4b0;}
+  .mc.climbed::before{background:var(--moss);}
+  .mc.climbed .mn{color:var(--peak);}
+  .mc .pt{width:100%;height:66px;object-fit:cover;border-radius:5px;margin-bottom:7px;display:block;}
+  .mr{font-size:9px;color:var(--stone-l);letter-spacing:.07em;margin-bottom:4px;font-family:'DM Serif Display',serif;display:flex;align-items:center;gap:4px;}
+  .mn{font-family:'Noto Serif TC',serif;font-size:14px;font-weight:600;color:var(--ink);line-height:1.3;margin-bottom:4px;}
+  .mrg{font-size:9px;color:var(--stone-l);margin-bottom:3px;}
+  .mm{display:flex;justify-content:space-between;align-items:center;margin-top:5px;}
+  .me{font-size:10px;color:var(--stone);}
+  .mck{width:19px;height:19px;border-radius:50%;border:1.5px solid var(--mist);display:flex;align-items:center;justify-content:center;font-size:10px;transition:all .15s;flex-shrink:0;color:transparent;}
+  .mc.climbed .mck{background:var(--moss);border-color:var(--moss);color:#fff;}
+  .mdt{font-size:9px;color:var(--moss);margin-top:3px;}
+  .mg-grade{display:inline-block;font-size:8px;padding:1px 4px;border-radius:3px;letter-spacing:.05em;font-weight:500;}
+  .gA{background:#e8f0e8;color:#4a6741;}.gB{background:#f0e8e0;color:#7a5a3a;}.gC{background:#f0e0e0;color:#8b4a3a;}
+  .es{text-align:center;padding:48px 20px;color:var(--stone-l);grid-column:1/-1;}
+  .ei{font-size:34px;margin-bottom:10px;opacity:.4;}
+  .et{font-size:12px;}
+  .mo{position:fixed;inset:0;background:rgba(26,26,24,.55);z-index:1000;display:flex;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(5px);opacity:0;pointer-events:none;transition:opacity .2s;}
+  .mo.open{opacity:1;pointer-events:all;}
+  .md{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.22);transform:translateY(14px);transition:transform .25s cubic-bezier(.34,1.56,.64,1);max-height:90vh;overflow-y:auto;}
+  .mo.open .md{transform:translateY(0);}
+  .mdm{font-family:'Noto Serif TC',serif;font-size:20px;font-weight:600;color:var(--peak);margin-bottom:3px;}
+  .mds{font-size:11px;color:var(--stone);margin-bottom:18px;}
+  .mdl{font-size:10px;color:var(--stone);letter-spacing:.1em;text-transform:uppercase;margin-bottom:6px;margin-top:14px;}
+  .mdl:first-of-type{margin-top:0;}
+  .md input[type="date"],.mdn{width:100%;padding:9px 13px;border:1px solid var(--mist);border-radius:8px;font-family:'Noto Sans TC',sans-serif;font-size:14px;color:var(--ink);outline:none;transition:border-color .2s;background:#fff;}
+  .md input[type="date"]:focus,.mdn:focus{border-color:var(--moss-l);box-shadow:0 0 0 3px rgba(74,103,65,.1);}
+  .mdn{resize:none;height:68px;}
+  .puw{margin-bottom:2px;}
+  .pua{border:1.5px dashed var(--mist);border-radius:8px;padding:13px;text-align:center;cursor:pointer;transition:all .15s;background:#fafaf8;}
+  .pua:hover{border-color:var(--moss-l);background:#f5f8f4;}
+  .pua input{display:none;}
+  .puh{font-size:11px;color:var(--stone-l);}
+  .mpp{width:100%;max-height:130px;object-fit:cover;border-radius:7px;margin-top:7px;display:none;}
+  .pcl{font-size:10px;color:var(--danger);cursor:pointer;margin-top:3px;display:none;text-decoration:underline;}
+  .mbs{display:flex;gap:7px;margin-top:18px;}
+  .bcan{flex:1;padding:10px;border:1px solid var(--mist);border-radius:8px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--stone);cursor:pointer;transition:all .15s;}
+  .bcan:hover{background:var(--cloud);}
+  .bcon{flex:2;padding:10px;border:none;border-radius:8px;background:var(--moss);font-family:'Noto Sans TC',sans-serif;font-size:12px;color:#fff;cursor:pointer;transition:background .15s;}
+  .bcon:hover{background:var(--peak);}
+  .bun{padding:10px 12px;border:1px solid #d4a0a0;border-radius:8px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:11px;color:var(--danger);cursor:pointer;transition:all .15s;white-space:nowrap;}
+  .bun:hover{background:#fdf0f0;}
+  .mly-hd{display:flex;align-items:center;justify-content:space-between;margin-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .ybs{display:flex;gap:7px;flex-wrap:wrap;}
+  .yb{padding:5px 13px;border:1px solid var(--mist);border-radius:20px;background:#fff;font-family:'Noto Sans TC',sans-serif;font-size:12px;color:var(--stone);cursor:pointer;transition:all .15s;}
+  .yb:hover{border-color:var(--moss-l);color:var(--moss);}
+  .yb.active{background:var(--moss);border-color:var(--moss);color:#fff;}
+  .ysum{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:11px;margin-bottom:22px;}
+  .ysc{background:#fff;border:1px solid var(--mist);border-radius:10px;padding:15px;}
+  .yscn{font-family:'DM Serif Display',serif;font-size:26px;color:var(--moss);line-height:1;}
+  .yscl{font-size:10px;color:var(--stone);margin-top:3px;letter-spacing:.05em;}
+  .mlg{display:grid;grid-template-columns:repeat(auto-fill,minmax(115px,1fr));gap:9px;}
+  .moc{background:#fff;border:1px solid var(--mist);border-radius:10px;padding:13px 11px;text-align:center;transition:all .15s;}
+  .moc:hover{border-color:var(--stone-l);box-shadow:0 4px 12px rgba(0,0,0,.06);}
+  .moc.hd{border-color:#c8d8c0;}
+  .mn2{font-family:'Noto Serif TC',serif;font-size:12px;color:var(--ink);margin-bottom:5px;font-weight:600;}
+  .mc2{font-family:'DM Serif Display',serif;font-size:28px;color:var(--moss);line-height:1;}
+  .mc2.z{color:var(--mist);}
+  .mu{font-size:9px;color:var(--stone);margin-top:1px;}
+  .mbw{margin-top:7px;height:3px;background:var(--cloud);border-radius:2px;overflow:hidden;}
+  .mb{height:100%;background:linear-gradient(90deg,var(--moss-l),var(--moss));border-radius:2px;transition:width .8s;}
+  .mlist{margin-top:5px;font-size:8px;color:var(--stone);line-height:1.7;text-align:left;}
+  .tpane{display:none;}
+  .tpane.active{display:block;}
+  .toast{position:fixed;bottom:26px;left:50%;transform:translateX(-50%) translateY(80px);background:var(--peak);color:#e8e4d8;padding:10px 20px;border-radius:100px;font-size:13px;z-index:2000;transition:transform .35s cubic-bezier(.34,1.56,.64,1);white-space:nowrap;pointer-events:none;}
+  .toast.show{transform:translateX(-50%) translateY(0);}
+  @keyframes fu{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:translateY(0);}}
+  @media(max-width:600px){.hi{padding:22px 14px 18px;}main{padding:18px 12px 48px;}.ni{padding:0 12px;}.tb{padding:12px 12px;font-size:12px;}.mg{grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:7px;}}
+</style>
+</head>
+<body>
+<header>
+  <div class="hbg"></div>
+  <svg class="msvg" viewBox="0 0 1200 80" preserveAspectRatio="none" fill="white">
+    <polygon points="0,80 100,35 185,58 285,12 385,48 500,8 620,42 740,18 865,52 980,22 1085,46 1200,28 1200,80"/>
+  </svg>
+  <div class="hi">
+    <div><h1 class="st"><span>Taiwan Mountain Records</span>山岳成就紀錄</h1></div>
+    <div class="hs">
+      <div class="hstat"><div class="hn" id="totalClimbed">0</div><div class="hl">已完登</div></div>
+      <div class="hdv"></div>
+      <div class="hstat"><div class="hn">300</div><div class="hl">總座數</div></div>
+      <div class="hdv"></div>
+      <div class="hstat" style="cursor:pointer" onclick="loadFromCloud()" title="點擊重新同步">
+        <div style="display:flex;align-items:center;gap:6px;justify-content:center">
+          <div id="syncDot" style="width:8px;height:8px;border-radius:50%;background:#b5a99a;flex-shrink:0;transition:background .3s"></div>
+          <div id="syncLabel" style="font-size:10px;color:#8ab88a;letter-spacing:.1em">載入中</div>
+        </div>
+        <div style="font-size:9px;color:rgba(138,184,138,.5);letter-spacing:.1em;margin-top:3px;text-align:center">點擊同步</div>
+      </div>
+    </div>
+  </div>
+</header>
+<nav class="nav-tabs">
+  <div class="ni">
+    <button class="tb active" onclick="switchTab('h',this)">百岳 <span class="tbadge" id="badge-h">0</span></button>
+    <button class="tb" onclick="switchTab('s',this)">小百岳 <span class="tbadge" id="badge-s">0</span></button>
+    <button class="tb" onclick="switchTab('m',this)">中級山 <span class="tbadge" id="badge-m">0</span></button>
+    <button class="tb" onclick="switchTab('mo',this)">每月統計</button>
+  </div>
+</nav>
+<main>
+  <!-- 百岳 -->
+  <div class="tpane active" id="tab-h">
+    <div class="ps">
+      <div class="pc">
+        <div class="rw rp"><svg width="66" height="66" viewBox="0 0 66 66"><circle class="rbg" cx="33" cy="33" r="27"/><circle class="rfg" cx="33" cy="33" r="27" id="ring-h" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><div class="rc"><div class="rn" id="cnt-h">0</div><div class="rd">/100</div></div></div>
+        <div class="pi"><h3>台灣百岳</h3><div class="pp">完成度 <strong id="pct-h">0%</strong></div><div class="pb"><div class="pf" style="background:var(--moss);width:0%" id="pb-h"></div></div></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="sb"><span class="si">⌕</span><input type="text" placeholder="搜尋山名、縣市…" oninput="renderGrid('h')" id="search-h"></div>
+      <div class="fbs"><button class="fb active" onclick="setF('h','all',this)">全部</button><button class="fb" onclick="setF('h','c',this)">已登</button><button class="fb" onclick="setF('h','p',this)">未登</button></div>
+      <span class="cl" id="cl-h">100 座</span>
+      <button class="pdfb" onclick="exportPDF('h')">⬇ PDF</button>
+    </div>
+    <div class="sh"><span class="sl">按海拔高度排序</span><div class="sln"></div></div>
+    <div class="mg" id="grid-h"></div>
+  </div>
+  <!-- 小百岳 -->
+  <div class="tpane" id="tab-s">
+    <div class="ps">
+      <div class="pc">
+        <div class="rw rs"><svg width="66" height="66" viewBox="0 0 66 66"><circle class="rbg" cx="33" cy="33" r="27"/><circle class="rfg" cx="33" cy="33" r="27" id="ring-s" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><div class="rc"><div class="rn" id="cnt-s">0</div><div class="rd">/100</div></div></div>
+        <div class="pi"><h3>台灣小百岳</h3><div class="pp">完成度 <strong id="pct-s">0%</strong></div><div class="pb"><div class="pf" style="background:var(--sm-c);width:0%" id="pb-s"></div></div></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="sb"><span class="si">⌕</span><input type="text" placeholder="搜尋山名、縣市…" oninput="renderGrid('s')" id="search-s"></div>
+      <div class="fbs"><button class="fb active" onclick="setF('s','all',this)">全部</button><button class="fb" onclick="setF('s','c',this)">已登</button><button class="fb" onclick="setF('s','p',this)">未登</button></div>
+      <span class="cl" id="cl-s">100 座</span>
+      <button class="pdfb" onclick="exportPDF('s')">⬇ PDF</button>
+    </div>
+    <div class="sh"><span class="sl">2017年官方修訂版</span><div class="sln"></div></div>
+    <div class="mg" id="grid-s"></div>
+  </div>
+  <!-- 中級山 -->
+  <div class="tpane" id="tab-m">
+    <div class="ps">
+      <div class="pc">
+        <div class="rw rm"><svg width="66" height="66" viewBox="0 0 66 66"><circle class="rbg" cx="33" cy="33" r="27"/><circle class="rfg" cx="33" cy="33" r="27" id="ring-m" stroke-dasharray="169.6" stroke-dashoffset="169.6"/></svg><div class="rc"><div class="rn" id="cnt-m">0</div><div class="rd">/100</div></div></div>
+        <div class="pi"><h3>中級山精選</h3><div class="pp">完成度 <strong id="pct-m">0%</strong></div><div class="pb"><div class="pf" style="background:var(--mid-c);width:0%" id="pb-m"></div></div></div>
+      </div>
+    </div>
+    <div class="toolbar">
+      <div class="sb"><span class="si">⌕</span><input type="text" placeholder="搜尋山名、縣市…" oninput="renderGrid('m')" id="search-m"></div>
+      <div class="fbs"><button class="fb active" onclick="setF('m','all',this)">全部</button><button class="fb" onclick="setF('m','c',this)">已登</button><button class="fb" onclick="setF('m','p',this)">未登</button></div>
+      <span class="cl" id="cl-m">100 座</span>
+      <button class="pdfb" onclick="exportPDF('m')">⬇ PDF</button>
+    </div>
+    <div class="sh"><span class="sl">精選知名中級山路線</span><div class="sln"></div></div>
+    <div class="mg" id="grid-m"></div>
+  </div>
+  <!-- 每月統計 -->
+  <div class="tpane" id="tab-mo">
+    <div class="mly-hd">
+      <div class="sh" style="margin-bottom:0;flex:1"><span class="sl">每月登山紀錄</span><div class="sln"></div></div>
+      <div class="ybs" id="yearBtns"></div>
+      <button class="pdfb" onclick="exportMonthlyPDF()">⬇ 年度報告</button>
+    </div>
+    <div class="ysum" id="ysum"></div>
+    <div class="mlg" id="mlg"></div>
+  </div>
+</main>
+
+<!-- MODAL -->
+<div class="mo" id="mo" onclick="closeMoBg(event)">
+  <div class="md">
+    <div class="mdm" id="mdm">—</div>
+    <div class="mds" id="mds">—</div>
+    <div class="mdl">登頂日期</div>
+    <input type="date" id="mdd">
+    <div class="mdl">登頂照片（選填）</div>
+    <div class="puw">
+      <div class="pua" onclick="document.getElementById('pfi').click()">
+        <input type="file" id="pfi" accept="image/*" onchange="handlePhoto(event)">
+        <div class="puh">📷 點擊上傳照片</div>
+      </div>
+      <img id="mpp" class="mpp" alt="">
+      <div class="pcl" id="pcl" onclick="clearPhoto()">✕ 移除照片</div>
+    </div>
+    <div class="mdl">備忘（選填）</div>
+    <textarea class="mdn" id="mdn" placeholder="天氣、同行夥伴、心得…"></textarea>
+    <div class="mbs">
+      <button class="bcan" onclick="closeMo()">取消</button>
+      <button class="bun" id="bun" onclick="unmark()" style="display:none">移除</button>
+      <button class="bcon" id="bcon" onclick="confirm_()">✓ 記錄登頂</button>
+    </div>
+  </div>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── DATA ──────────────────────────────────────────────────────────
+const D = {
+  h:[
+    {r:1,n:'玉山',e:3952,rg:'南投縣、高雄市、嘉義縣',g:'A'},{r:2,n:'雪山',e:3886,rg:'苗栗縣、臺中市',g:'A'},
+    {r:3,n:'玉山東峰',e:3869,rg:'南投縣、高雄市',g:'A'},{r:4,n:'玉山北峰',e:3858,rg:'南投縣',g:'A'},
+    {r:5,n:'玉山南峰',e:3844,rg:'高雄市',g:'B'},{r:6,n:'秀姑巒山',e:3805,rg:'花蓮縣、南投縣',g:'C'},
+    {r:7,n:'馬博拉斯山',e:3785,rg:'花蓮縣、南投縣',g:'C'},{r:8,n:'南湖大山',e:3742,rg:'臺中市',g:'B'},
+    {r:9,n:'東小南山',e:3711,rg:'高雄市',g:'C'},{r:10,n:'中央尖山',e:3705,rg:'臺中市、花蓮縣',g:'C+'},
+    {r:11,n:'雪山北峰',e:3703,rg:'苗栗縣、臺中市',g:'B'},{r:12,n:'關山',e:3668,rg:'台東縣、高雄市',g:'B'},
+    {r:13,n:'大水窟山',e:3642,rg:'花蓮縣、南投縣',g:'C'},{r:14,n:'南湖大山東峰',e:3632,rg:'臺中市、花蓮縣',g:'B'},
+    {r:15,n:'東郡大山',e:3619,rg:'南投縣',g:'C+'},{r:16,n:'奇萊北峰',e:3607,rg:'花蓮縣',g:'B'},
+    {r:17,n:'向陽山',e:3603,rg:'高雄市、台東縣',g:'A'},{r:18,n:'大劍山',e:3594,rg:'臺中市',g:'B'},
+    {r:19,n:'雲峰',e:3564,rg:'高雄市',g:'C'},{r:20,n:'奇萊主山',e:3560,rg:'花蓮縣、南投縣',g:'B'},
+    {r:21,n:'馬利加南山',e:3546,rg:'南投縣、花蓮縣',g:'C'},{r:22,n:'南湖北山',e:3536,rg:'宜蘭縣、臺中市',g:'B'},
+    {r:23,n:'大雪山',e:3530,rg:'苗栗縣、臺中市',g:'B'},{r:24,n:'品田山',e:3524,rg:'新竹縣、臺中市',g:'B'},
+    {r:25,n:'玉山西峰',e:3518,rg:'嘉義縣、南投縣',g:'B'},{r:26,n:'頭鷹山',e:3510,rg:'臺中市、苗栗縣',g:'B'},
+    {r:27,n:'三叉山',e:3496,rg:'花蓮縣、台東縣、高雄市',g:'A'},{r:28,n:'大霸尖山',e:3492,rg:'新竹縣、苗栗縣',g:'B'},
+    {r:29,n:'南湖大山南峰',e:3475,rg:'臺中市、花蓮縣',g:'B'},{r:30,n:'東巒大山',e:3468,rg:'南投縣',g:'C+'},
+    {r:31,n:'無明山',e:3451,rg:'臺中市、花蓮縣',g:'B'},{r:32,n:'巴巴山',e:3449,rg:'臺中市、花蓮縣',g:'B'},
+    {r:33,n:'馬西山',e:3443,rg:'花蓮縣',g:'C'},{r:34,n:'北合歡山',e:3422,rg:'南投縣、花蓮縣',g:'A'},
+    {r:35,n:'合歡山東峰',e:3421,rg:'南投縣、花蓮縣',g:'A'},{r:36,n:'小霸尖山',e:3418,rg:'苗栗縣',g:'B'},
+    {r:37,n:'合歡山主峰',e:3417,rg:'南投縣',g:'A'},{r:38,n:'布秀蘭山',e:3414,rg:'苗栗縣、臺中市',g:'B'},
+    {r:39,n:'義西請馬至山',e:3394,rg:'南投縣',g:'C'},{r:40,n:'奇萊南峰',e:3358,rg:'花蓮縣、南投縣',g:'C'},
+    {r:41,n:'志佳陽大山',e:3345,rg:'臺中市',g:'B'},{r:42,n:'白姑大山',e:3341,rg:'臺中市',g:'B'},
+    {r:43,n:'新康山',e:3331,rg:'花蓮縣、台東縣',g:'C'},{r:44,n:'桃山',e:3325,rg:'苗栗縣',g:'A'},
+    {r:45,n:'丹大山',e:3325,rg:'南投縣、花蓮縣',g:'C+'},{r:46,n:'佳陽山',e:3314,rg:'臺中市',g:'B'},
+    {r:47,n:'池有山',e:3303,rg:'苗栗縣、臺中市',g:'A'},{r:48,n:'卑南主山',e:3293,rg:'台東縣',g:'B'},
+    {r:49,n:'干卓萬山',e:3284,rg:'南投縣',g:'C'},{r:50,n:'郡大山',e:3263,rg:'南投縣',g:'B'},
+    {r:51,n:'能高山',e:3262,rg:'南投縣、花蓮縣',g:'A'},{r:52,n:'屏風山',e:3250,rg:'花蓮縣',g:'B'},
+    {r:53,n:'達芬尖山',e:3208,rg:'花蓮縣、南投縣',g:'C+'},{r:54,n:'玉山前峰',e:3239,rg:'南投縣',g:'A'},
+    {r:55,n:'石門山',e:3237,rg:'南投縣',g:'A'},{r:56,n:'無雙山',e:3231,rg:'南投縣',g:'C+'},
+    {r:57,n:'塔關山',e:3222,rg:'高雄市',g:'C+'},{r:58,n:'鈴鳴山',e:3272,rg:'南投縣',g:'C'},
+    {r:59,n:'審馬陣山',e:3141,rg:'苗栗縣',g:'B'},{r:60,n:'喀拉業山',e:3133,rg:'苗栗縣',g:'A'},
+    {r:61,n:'加利山',e:3112,rg:'新竹縣、苗栗縣',g:'B'},{r:62,n:'六順山',e:3108,rg:'南投縣',g:'C'},
+    {r:63,n:'白石山',e:3108,rg:'宜蘭縣',g:'B'},{r:64,n:'北大武山',e:3092,rg:'屏東縣、台東縣',g:'B'},
+    {r:65,n:'大武山',e:3092,rg:'屏東縣、台東縣',g:'B'},{r:66,n:'塔芬山',e:3090,rg:'南投縣',g:'C'},
+    {r:67,n:'尾寮山',e:3090,rg:'屏東縣',g:'B'},{r:68,n:'西巒大山',e:3081,rg:'南投縣',g:'B'},
+    {r:69,n:'羊頭山',e:3035,rg:'南投縣',g:'A'},{r:70,n:'卡社群山',e:3012,rg:'南投縣',g:'B'},
+    {r:71,n:'安東軍山',e:3068,rg:'南投縣',g:'B'},{r:72,n:'內嶺爾山',e:3068,rg:'南投縣',g:'C'},
+    {r:73,n:'能高山南峰',e:3349,rg:'南投縣、花蓮縣',g:'B'},{r:74,n:'畢祿山',e:3371,rg:'臺中市',g:'B'},
+    {r:75,n:'卓社大山',e:3369,rg:'南投縣',g:'C'},{r:76,n:'伊澤山',e:3297,rg:'新竹縣、苗栗縣',g:'B'},
+    {r:77,n:'南湖大山西峰',e:3592,rg:'宜蘭縣、臺中市',g:'B'},{r:78,n:'馬博橫斷峰',e:3670,rg:'花蓮縣、南投縣',g:'C'},
+    {r:79,n:'閂山',e:3118,rg:'宜蘭縣',g:'B'},{r:80,n:'萬東山',e:3684,rg:'南投縣',g:'C'},
+    {r:81,n:'喀西帕南山',e:3618,rg:'南投縣',g:'C'},{r:82,n:'火石山',e:3310,rg:'花蓮縣',g:'C'},
+    {r:83,n:'無明山東峰',e:3360,rg:'臺中市、花蓮縣',g:'B'},{r:84,n:'立山',e:3301,rg:'南投縣',g:'C'},
+    {r:85,n:'布拉克桑山',e:3354,rg:'南投縣',g:'C'},{r:86,n:'三叉山西峰',e:3440,rg:'花蓮縣、台東縣',g:'B'},
+    {r:87,n:'奇峻山',e:3304,rg:'宜蘭縣',g:'C'},{r:88,n:'小關山',e:3249,rg:'高雄市',g:'C'},
+    {r:89,n:'望鄉山',e:2760,rg:'南投縣',g:'B'},{r:90,n:'水社大山',e:2059,rg:'南投縣',g:'A'},
+    {r:91,n:'麒麟山',e:3098,rg:'南投縣',g:'C'},{r:92,n:'嘉明湖畔山',e:3310,rg:'台東縣',g:'A'},
+    {r:93,n:'合歡山西峰',e:3145,rg:'南投縣',g:'A'},{r:94,n:'南湖大山北峰',e:3536,rg:'宜蘭縣',g:'B'},
+    {r:95,n:'奇萊連峰',e:3560,rg:'花蓮縣',g:'B'},{r:96,n:'馬利加南東山',e:3468,rg:'南投縣',g:'C'},
+    {r:97,n:'三叉山支稜',e:3400,rg:'台東縣',g:'B'},{r:98,n:'鈴鳴山北峰',e:3202,rg:'南投縣',g:'C'},
+    {r:99,n:'馬西山北峰',e:3443,rg:'花蓮縣',g:'C'},{r:100,n:'塔羅木山',e:3260,rg:'花蓮縣',g:'C'},
+  ],
+  s:[
+    {r:1,n:'大屯山',e:1092,rg:'台北市、新北市'},{r:2,n:'七星山',e:1120,rg:'台北市'},
+    {r:3,n:'大武崙山',e:231,rg:'基隆市'},{r:4,n:'槓子寮山',e:163,rg:'基隆市'},
+    {r:5,n:'觀音山',e:616,rg:'新北市'},{r:6,n:'基隆山',e:588,rg:'新北市'},
+    {r:7,n:'紅淡山',e:210,rg:'基隆市'},{r:8,n:'大崙頭山',e:478,rg:'台北市'},
+    {r:9,n:'劍潭山',e:153,rg:'台北市'},{r:10,n:'五分山',e:757,rg:'新北市'},
+    {r:11,n:'姜子寮山',e:729,rg:'基隆市'},{r:12,n:'汐止大尖山',e:460,rg:'新北市'},
+    {r:13,n:'南港山',e:375,rg:'台北市'},{r:14,n:'土庫岳',e:389,rg:'新北市'},
+    {r:15,n:'大棟山',e:405,rg:'新北市、桃園市'},{r:16,n:'南勢角山',e:302,rg:'新北市'},
+    {r:17,n:'二格山',e:678,rg:'台北市、新北市'},{r:18,n:'天上山',e:429,rg:'新北市'},
+    {r:19,n:'福德坑山',e:321,rg:'新北市'},{r:20,n:'獅仔頭山',e:858,rg:'新北市'},
+    {r:21,n:'金面山',e:667,rg:'桃園市'},{r:22,n:'東眼山',e:1212,rg:'新北市、桃園市'},
+    {r:23,n:'溪洲山',e:577,rg:'桃園市'},{r:24,n:'石門山',e:551,rg:'桃園市'},
+    {r:25,n:'石牛山',e:671,rg:'桃園市、新竹縣'},{r:26,n:'十八尖山',e:130,rg:'新竹市'},
+    {r:27,n:'飛鳳山',e:462,rg:'新竹縣'},{r:28,n:'李崠山',e:1914,rg:'桃園市、新竹縣'},
+    {r:29,n:'獅頭山',e:492,rg:'苗栗縣'},{r:30,n:'五指山',e:1062,rg:'新竹縣'},
+    {r:31,n:'鵝公髻山',e:1579,rg:'新竹縣、苗栗縣'},{r:32,n:'向天湖山',e:1225,rg:'苗栗縣'},
+    {r:33,n:'仙山',e:967,rg:'苗栗縣'},{r:34,n:'加里山',e:2210,rg:'苗栗縣'},
+    {r:35,n:'火炎山',e:596,rg:'苗栗縣'},{r:36,n:'關刀山',e:889,rg:'苗栗縣'},
+    {r:37,n:'馬那邦山',e:1407,rg:'苗栗縣'},{r:38,n:'鐵砧山',e:236,rg:'台中市'},
+    {r:39,n:'稍來山',e:2307,rg:'台中市'},{r:40,n:'頭嵙山',e:858,rg:'台中市'},
+    {r:41,n:'大坑山',e:857,rg:'台中市'},{r:42,n:'八卦山',e:237,rg:'彰化縣'},
+    {r:43,n:'集集大山',e:1392,rg:'南投縣'},{r:44,n:'九九峰',e:549,rg:'南投縣'},
+    {r:45,n:'日月潭貓囒山',e:1020,rg:'南投縣'},{r:46,n:'鳳凰山',e:1363,rg:'南投縣'},
+    {r:47,n:'雙冬九份二山',e:1452,rg:'南投縣'},{r:48,n:'梅山公園',e:310,rg:'雲林縣'},
+    {r:49,n:'草嶺山',e:1235,rg:'雲林縣'},{r:50,n:'太平山',e:1000,rg:'嘉義縣'},
+    {r:51,n:'阿里山塔山',e:2663,rg:'嘉義縣'},{r:52,n:'獨立山',e:832,rg:'嘉義縣'},
+    {r:53,n:'三腳南山',e:1699,rg:'嘉義縣'},{r:54,n:'關子嶺大凍山',e:1241,rg:'台南市'},
+    {r:55,n:'二仁溪龜山',e:302,rg:'台南市'},{r:56,n:'龍崎牛埔惡地',e:130,rg:'台南市'},
+    {r:57,n:'蓮花池山',e:485,rg:'高雄市'},{r:58,n:'柴山',e:356,rg:'高雄市'},
+    {r:59,n:'旗尾山',e:592,rg:'高雄市'},{r:60,n:'六龜十八羅漢山',e:400,rg:'高雄市'},
+    {r:61,n:'藤枝鳥松山',e:1720,rg:'高雄市'},{r:62,n:'甲仙五掌山',e:1076,rg:'高雄市'},
+    {r:63,n:'屏東大武山',e:3090,rg:'屏東縣'},{r:64,n:'尾寮山',e:1427,rg:'屏東縣'},
+    {r:65,n:'里龍山',e:1062,rg:'屏東縣'},{r:66,n:'浸水營大漢山',e:1634,rg:'屏東縣'},
+    {r:67,n:'知本主山',e:1167,rg:'台東縣'},{r:68,n:'都蘭山',e:1190,rg:'台東縣'},
+    {r:69,n:'三仙台',e:77,rg:'台東縣'},{r:70,n:'太麻里金針山',e:1340,rg:'台東縣'},
+    {r:71,n:'嘉明湖',e:3310,rg:'台東縣'},{r:72,n:'鹿野高台',e:350,rg:'台東縣'},
+    {r:73,n:'錐麓古道斷崖',e:600,rg:'花蓮縣'},{r:74,n:'鳳林鳳凰山',e:741,rg:'花蓮縣'},
+    {r:75,n:'玉里神社山',e:438,rg:'花蓮縣'},{r:76,n:'富里六十石山',e:800,rg:'花蓮縣'},
+    {r:77,n:'光復大農大富',e:175,rg:'花蓮縣'},{r:78,n:'赤科山',e:1178,rg:'花蓮縣'},
+    {r:79,n:'壽豐鯉魚山',e:469,rg:'花蓮縣'},{r:80,n:'新城清水大山',e:2408,rg:'花蓮縣'},
+    {r:81,n:'宜蘭三角崙山',e:1856,rg:'宜蘭縣'},{r:82,n:'蘭陽望龍埤',e:350,rg:'宜蘭縣'},
+    {r:83,n:'礁溪林美山',e:516,rg:'宜蘭縣'},{r:84,n:'員山望洋山',e:778,rg:'宜蘭縣'},
+    {r:85,n:'冬山河親水公園',e:30,rg:'宜蘭縣'},{r:86,n:'南澳古道南澳嶺',e:750,rg:'宜蘭縣'},
+    {r:87,n:'碧候山',e:1265,rg:'宜蘭縣'},{r:88,n:'鶯子嶺山',e:401,rg:'宜蘭縣'},
+    {r:89,n:'龜山島',e:401,rg:'宜蘭縣'},{r:90,n:'澎湖拱北山',e:45,rg:'澎湖縣'},
+    {r:91,n:'金門獅山',e:253,rg:'金門縣'},{r:92,n:'馬祖雲台山',e:248,rg:'連江縣'},
+    {r:93,n:'三峽鳶嘴山',e:1914,rg:'新北市'},{r:94,n:'烏來福山',e:1400,rg:'新北市'},
+    {r:95,n:'坪林石空古道',e:723,rg:'新北市'},{r:96,n:'雙溪虎豹潭',e:400,rg:'新北市'},
+    {r:97,n:'平溪薯榔尖',e:767,rg:'新北市'},{r:98,n:'淡水竹子山',e:1101,rg:'新北市'},
+    {r:99,n:'基隆情人湖',e:110,rg:'基隆市'},{r:100,n:'和平島',e:30,rg:'基隆市'},
+  ],
+  m:[
+    {r:1,n:'北插天山',e:1727,rg:'桃園市'},{r:2,n:'拉拉山',e:1631,rg:'桃園市'},
+    {r:3,n:'鴛鴦湖',e:1690,rg:'桃園市'},{r:4,n:'李崠山',e:1914,rg:'桃園市、新竹縣'},
+    {r:5,n:'油羅山',e:1764,rg:'新竹縣'},{r:6,n:'鳥嘴山',e:2000,rg:'新竹縣'},
+    {r:7,n:'霞喀羅大山',e:2050,rg:'新竹縣'},{r:8,n:'加里山',e:2220,rg:'苗栗縣'},
+    {r:9,n:'馬那邦山',e:1407,rg:'苗栗縣'},{r:10,n:'南庄山',e:1067,rg:'苗栗縣'},
+    {r:11,n:'稍來山',e:2307,rg:'台中市'},{r:12,n:'鳶嘴山',e:1914,rg:'台中市'},
+    {r:13,n:'馬崙山',e:2036,rg:'台中市'},{r:14,n:'波津加山',e:1987,rg:'台中市'},
+    {r:15,n:'屋我尾山',e:2007,rg:'台中市'},{r:16,n:'東卯山',e:1690,rg:'台中市'},
+    {r:17,n:'唐麻丹山',e:2052,rg:'台中市'},{r:18,n:'八仙山',e:2366,rg:'台中市'},
+    {r:19,n:'白毛山',e:2260,rg:'台中市'},{r:20,n:'白姑大山',e:3341,rg:'台中市'},
+    {r:21,n:'小觀音山',e:1070,rg:'台北市'},{r:22,n:'七星山東峰',e:1107,rg:'台北市'},
+    {r:23,n:'竹子山',e:1101,rg:'台北市'},{r:24,n:'磺嘴山',e:1090,rg:'台北市'},
+    {r:25,n:'石梯嶺',e:1016,rg:'台北市'},{r:26,n:'南勢角山',e:1113,rg:'新北市'},
+    {r:27,n:'烏來福山',e:1400,rg:'新北市'},{r:28,n:'加九嶺',e:1230,rg:'新北市'},
+    {r:29,n:'棲霞山',e:1630,rg:'新北市'},{r:30,n:'思源啞口',e:2100,rg:'宜蘭縣'},
+    {r:31,n:'太平山',e:2000,rg:'宜蘭縣'},{r:32,n:'加羅湖',e:1780,rg:'宜蘭縣'},
+    {r:33,n:'松羅湖',e:1173,rg:'宜蘭縣'},{r:34,n:'翠峰湖',e:1840,rg:'宜蘭縣'},
+    {r:35,n:'三角崙山',e:1856,rg:'宜蘭縣'},{r:36,n:'磐石山',e:1850,rg:'宜蘭縣'},
+    {r:37,n:'見晴懷古道',e:1800,rg:'宜蘭縣'},{r:38,n:'馬告神木群',e:1200,rg:'宜蘭縣'},
+    {r:39,n:'棲蘭神木群',e:1400,rg:'宜蘭縣'},{r:40,n:'望洋山',e:1291,rg:'宜蘭縣'},
+    {r:41,n:'集集大山',e:1392,rg:'南投縣'},{r:42,n:'鳳凰山',e:1363,rg:'南投縣'},
+    {r:43,n:'郡大山',e:3263,rg:'南投縣'},{r:44,n:'西巒大山',e:3081,rg:'南投縣'},
+    {r:45,n:'干卓萬山',e:3284,rg:'南投縣'},{r:46,n:'望鄉山',e:2760,rg:'南投縣'},
+    {r:47,n:'奧萬大',e:1020,rg:'南投縣'},{r:48,n:'眉原山',e:2455,rg:'南投縣'},
+    {r:49,n:'三腳南山',e:1699,rg:'嘉義縣'},{r:50,n:'阿里山塔山',e:2663,rg:'嘉義縣'},
+    {r:51,n:'特富野古道',e:2000,rg:'嘉義縣'},{r:52,n:'關子嶺大凍山',e:1241,rg:'台南市'},
+    {r:53,n:'藤枝鳥松山',e:1720,rg:'高雄市'},{r:54,n:'北大武山',e:3092,rg:'屏東縣'},
+    {r:55,n:'浸水營古道',e:1634,rg:'屏東縣'},{r:56,n:'尾寮山',e:1427,rg:'屏東縣'},
+    {r:57,n:'里龍山',e:1062,rg:'屏東縣'},{r:58,n:'知本主山',e:1167,rg:'台東縣'},
+    {r:59,n:'都蘭山',e:1190,rg:'台東縣'},{r:60,n:'嘉明湖',e:3310,rg:'台東縣'},
+    {r:61,n:'錐麓斷崖',e:600,rg:'花蓮縣'},{r:62,n:'清水大山',e:2408,rg:'花蓮縣'},
+    {r:63,n:'奇萊主山',e:3560,rg:'花蓮縣'},{r:64,n:'能高越嶺道',e:2700,rg:'南投縣、花蓮縣'},
+    {r:65,n:'碧綠神木',e:1700,rg:'花蓮縣'},{r:66,n:'六十石山',e:800,rg:'花蓮縣'},
+    {r:67,n:'赤科山',e:1178,rg:'花蓮縣'},{r:68,n:'木瓜山',e:3041,rg:'花蓮縣'},
+    {r:69,n:'哈崙工作站',e:1800,rg:'花蓮縣'},{r:70,n:'武陵農場',e:1740,rg:'台中市'},
+    {r:71,n:'桃山',e:3325,rg:'台中市'},{r:72,n:'品田山',e:3524,rg:'台中市'},
+    {r:73,n:'聖稜線',e:3500,rg:'台中市、苗栗縣'},{r:74,n:'雪山圈谷',e:3500,rg:'台中市'},
+    {r:75,n:'大雪山林道',e:2600,rg:'台中市'},{r:76,n:'南橫三星',e:2700,rg:'高雄市、台東縣'},
+    {r:77,n:'向陽山屋',e:3000,rg:'台東縣'},{r:78,n:'新康橫斷',e:3300,rg:'花蓮縣、台東縣'},
+    {r:79,n:'丹大林道',e:2400,rg:'南投縣'},{r:80,n:'對關古道',e:2000,rg:'台中市'},
+    {r:81,n:'司馬限林道',e:1800,rg:'台中市'},{r:82,n:'加里山稜線',e:2200,rg:'苗栗縣'},
+    {r:83,n:'太平山翠峰湖',e:1900,rg:'宜蘭縣'},{r:84,n:'鐵杉林古道',e:2000,rg:'宜蘭縣'},
+    {r:85,n:'嘉羅山',e:2078,rg:'宜蘭縣'},{r:86,n:'池南步道',e:1780,rg:'花蓮縣'},
+    {r:87,n:'七腳川山',e:1241,rg:'花蓮縣'},{r:88,n:'草嶺古道',e:1235,rg:'宜蘭縣'},
+    {r:89,n:'卡蘭山',e:1688,rg:'宜蘭縣'},{r:90,n:'明治林道',e:1800,rg:'台中市'},
+    {r:91,n:'佐倉步道',e:1600,rg:'嘉義縣'},{r:92,n:'對高岳',e:2288,rg:'嘉義縣'},
+    {r:93,n:'二延平步道',e:360,rg:'台中市'},{r:94,n:'冬瓜山',e:2000,rg:'南投縣'},
+    {r:95,n:'三地門山',e:940,rg:'屏東縣'},{r:96,n:'小鬼湖',e:1520,rg:'屏東縣'},
+    {r:97,n:'思源啞口南側',e:2200,rg:'宜蘭縣'},{r:98,n:'雪見遊憩區',e:2080,rg:'苗栗縣'},
+    {r:99,n:'大安溪峽谷',e:1200,rg:'台中市'},{r:100,n:'力行產業道路',e:1800,rg:'南投縣'},
+  ]
+};
+
+// ── SUPABASE CONFIG ───────────────────────────────────────────────
+const SB_URL = 'https://tnmyfiewntrwmfuqrtul.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRubXlmaWV3bnRyd21mdXFydHVsIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg1OTgyMDIsImV4cCI6MjA5NDE3NDIwMn0.gy0fbvyycc__iZyH4wkeJDtykmGVix2NKIIwRpNs9wE';
+const SB_HDR = {'Content-Type':'application/json','apikey':SB_KEY,'Authorization':'Bearer '+SB_KEY};
+
+async function sbFetch(path, opts={}){
+  const res = await fetch(SB_URL+'/rest/v1/'+path, {headers:SB_HDR, ...opts});
+  if(!res.ok){ const e=await res.text(); throw new Error(e); }
+  return res.status===204 ? null : res.json();
+}
+
+// ── STATE ─────────────────────────────────────────────────────────
+let rec = JSON.parse(localStorage.getItem('twHikV3')||'{}');
+let fil = {h:'all',s:'all',m:'all'};
+let cur = null, pPhoto = null, selY = new Date().getFullYear();
+let syncStatus = 'idle'; // idle | syncing | online | error
+const MTC = ['一月','二月','三月','四月','五月','六月','七月','八月','九月','十月','十一月','十二月'];
+const CIRC = 169.6;
+const LABELS = {h:'台灣百岳',s:'台灣小百岳',m:'中級山精選'};
+
+// 本地 + 雲端雙寫
+function saveLocal(){localStorage.setItem('twHikV3',JSON.stringify(rec));}
+function k(t,r){return t+'_'+r;}
+
+function setSyncStatus(s, msg=''){
+  syncStatus=s;
+  const el=document.getElementById('syncDot');
+  if(!el)return;
+  const colors={idle:'#b5a99a',syncing:'#c4963a',online:'#4a6741',error:'#8b3a3a'};
+  const labels={idle:'本地模式',syncing:'同步中…',online:'已同步',error:'同步失敗'};
+  el.style.background=colors[s];
+  document.getElementById('syncLabel').textContent=msg||labels[s];
+}
+
+// 從 Supabase 載入全部紀錄
+async function loadFromCloud(){
+  setSyncStatus('syncing');
+  try {
+    const rows = await sbFetch('hiking_records?select=type,rank,date,note,photo');
+    rec = {};
+    for(const row of rows){
+      rec[k(row.type, row.rank)] = {date:row.date, note:row.note, photo:row.photo, ts:Date.now()};
+    }
+    saveLocal();
+    setSyncStatus('online');
+    renderAll();
+  } catch(e){
+    console.warn('雲端載入失敗，使用本地資料',e);
+    setSyncStatus('error','離線模式');
+  }
+}
+
+// 寫入單筆到 Supabase（upsert）
+async function upsertCloud(type, rank, data){
+  try {
+    await sbFetch('hiking_records', {
+      method:'POST',
+      headers:{...SB_HDR,'Prefer':'resolution=merge-duplicates'},
+      body: JSON.stringify({type, rank, date:data.date, note:data.note||'', photo:data.photo||null})
+    });
+    setSyncStatus('online');
+  } catch(e){
+    console.warn('雲端寫入失敗',e);
+    setSyncStatus('error','本地已儲存');
+  }
+}
+
+// 從 Supabase 刪除單筆
+async function deleteCloud(type, rank){
+  try {
+    await sbFetch(`hiking_records?type=eq.${type}&rank=eq.${rank}`, {method:'DELETE'});
+    setSyncStatus('online');
+  } catch(e){
+    console.warn('雲端刪除失敗',e);
+    setSyncStatus('error','本地已刪除');
+  }
+}
+
+// ── GRID ──────────────────────────────────────────────────────────
+function renderGrid(t){
+  const g=document.getElementById('grid-'+t);
+  const q=document.getElementById('search-'+t).value.toLowerCase().trim();
+  const f=fil[t];
+  const vis=D[t].filter(m=>{
+    const rd=rec[k(t,m.r)], cl=!!rd;
+    if(f==='c'&&!cl)return false;
+    if(f==='p'&&cl)return false;
+    if(q&&!m.n.toLowerCase().includes(q)&&!m.rg.toLowerCase().includes(q)&&!String(m.r).includes(q))return false;
+    return true;
+  });
+  document.getElementById('cl-'+t).textContent=vis.length+' 座';
+  if(!vis.length){g.innerHTML='<div class="es"><div class="ei">🏔</div><div class="et">找不到符合條件的山頭</div></div>';return;}
+  g.innerHTML=vis.map((m,i)=>{
+    const rd=rec[k(t,m.r)],cl=!!rd;
+    const gc=m.g?'g'+m.g.replace('+',''):'';
+    const ph=rd?.photo?`<img class="pt" src="${rd.photo}" alt="${m.n}">`:'' ;
+    return`<div class="mc${cl?' climbed':''}" style="animation-delay:${Math.min(i,30)*.018}s" onclick="openMo('${t}',${m.r})">
+      ${ph}<div class="mr">${m.g?`<span class="mg-grade ${gc}">${m.g}</span>`:''} #${String(m.r).padStart(2,'0')}</div>
+      <div class="mn">${m.n}</div><div class="mrg">${m.rg}</div>
+      ${rd?.date?`<div class="mdt">📅 ${rd.date}</div>`:''}
+      <div class="mm"><span class="me">${m.e.toLocaleString()} m</span><div class="mck">${cl?'✓':''}</div></div>
+    </div>`;
+  }).join('');
+}
+
+// ── PROGRESS ──────────────────────────────────────────────────────
+function updProg(t){
+  const total=D[t].length,cl=D[t].filter(m=>!!rec[k(t,m.r)]).length,pct=Math.round(cl/total*100);
+  document.getElementById('cnt-'+t).textContent=cl;
+  document.getElementById('pct-'+t).textContent=pct+'%';
+  document.getElementById('pb-'+t).style.width=pct+'%';
+  document.getElementById('ring-'+t).style.strokeDashoffset=CIRC-(cl/total)*CIRC;
+  const b=document.getElementById('badge-'+t);if(b)b.textContent=cl;
+  document.getElementById('totalClimbed').textContent=Object.keys(rec).length;
+}
+
+// ── MONTHLY ───────────────────────────────────────────────────────
+function getYears(){
+  const ys=new Set([new Date().getFullYear()]);
+  for(const r of Object.values(rec))if(r.date)ys.add(+r.date.split('-')[0]);
+  return [...ys].sort((a,b)=>b-a);
+}
+function renderYrBtns(){
+  document.getElementById('yearBtns').innerHTML=getYears().map(y=>`<button class="yb${y===selY?' active':''}" onclick="selYear(${y})">${y}</button>`).join('');
+}
+function selYear(y){selY=y;renderYrBtns();renderMonthly();}
+
+function renderMonthly(){
+  renderYrBtns();
+  const yr=Object.entries(rec).filter(([,r])=>r.date&&r.date.startsWith(String(selY)));
+  document.getElementById('ysum').innerHTML=`
+    <div class="ysc"><div class="yscn">${yr.length}</div><div class="yscl">${selY} 年總登頂</div></div>
+    <div class="ysc"><div class="yscn">${new Set(yr.map(([,r])=>r.date?.slice(0,7))).size}</div><div class="yscl">活躍月份</div></div>
+    <div class="ysc"><div class="yscn">${Object.keys(rec).length}</div><div class="yscl">累計完登</div></div>`;
+  const bm={};for(let i=1;i<=12;i++)bm[i]=[];
+  for(const [kk,r] of Object.entries(rec)){
+    if(!r.date)continue;const[y,mo]=r.date.split('-');
+    if(+y!==selY)continue;
+    const[t,rk]=kk.split('_');const mtn=D[t]?.find(x=>x.r==rk);
+    bm[+mo].push(mtn?.n||kk);
+  }
+  const mx=Math.max(1,...Object.values(bm).map(a=>a.length));
+  document.getElementById('mlg').innerHTML=Object.entries(bm).map(([mo,items])=>`
+    <div class="moc${items.length?' hd':''}">
+      <div class="mn2">${MTC[mo-1]}</div>
+      <div class="mc2${!items.length?' z':''}">${items.length}</div>
+      <div class="mu">座</div>
+      <div class="mbw"><div class="mb" style="width:${Math.round(items.length/mx*100)}%"></div></div>
+      ${items.length?`<div class="mlist">${items.map(n=>'· '+n).join('<br>')}</div>`:''}
+    </div>`).join('');
+}
+
+// ── MODAL ─────────────────────────────────────────────────────────
+function openMo(t,r){
+  const m=D[t].find(x=>x.r===r),rd=rec[k(t,r)];
+  cur={t,r};pPhoto=rd?.photo||null;
+  document.getElementById('mdm').textContent=m.n;
+  const p=[];if(m.g)p.push(m.g+' 級');p.push(m.e.toLocaleString()+' 公尺',m.rg);
+  document.getElementById('mds').textContent=p.join(' · ');
+  document.getElementById('mdd').value=rd?.date||new Date().toISOString().split('T')[0];
+  document.getElementById('mdn').value=rd?.note||'';
+  const pp=document.getElementById('mpp'),pc=document.getElementById('pcl');
+  if(pPhoto){pp.src=pPhoto;pp.style.display='block';pc.style.display='block';}
+  else{pp.style.display='none';pc.style.display='none';}
+  document.getElementById('pfi').value='';
+  document.getElementById('bun').style.display=rd?'block':'none';
+  document.getElementById('bcon').textContent=rd?'✓ 更新紀錄':'✓ 記錄登頂';
+  document.getElementById('mo').classList.add('open');
+}
+function closeMo(){document.getElementById('mo').classList.remove('open');cur=null;pPhoto=null;}
+function closeMoBg(e){if(e.target===document.getElementById('mo'))closeMo();}
+
+function handlePhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const fr=new FileReader();
+  fr.onload=ev=>{
+    const img=new Image();
+    img.onload=()=>{
+      const cv=document.createElement('canvas');
+      let w=img.width,h=img.height,mw=800,mh=600;
+      if(w>mw){h=Math.round(h*mw/w);w=mw;}if(h>mh){w=Math.round(w*mh/h);h=mh;}
+      cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);
+      pPhoto=cv.toDataURL('image/jpeg',.75);
+      const pp=document.getElementById('mpp');pp.src=pPhoto;pp.style.display='block';
+      document.getElementById('pcl').style.display='block';
+    };img.src=ev.target.result;
+  };fr.readAsDataURL(f);
+}
+function clearPhoto(){pPhoto=null;document.getElementById('mpp').style.display='none';document.getElementById('pcl').style.display='none';document.getElementById('pfi').value='';}
+
+function confirm_(){
+  if(!cur)return;
+  const data={date:document.getElementById('mdd').value,note:document.getElementById('mdn').value.trim(),photo:pPhoto||null,ts:Date.now()};
+  rec[k(cur.t,cur.r)]=data;
+  saveLocal(); closeMo(); renderAll();
+  showToast('⛰ '+D[cur.t].find(x=>x.r===cur.r).n+' 登頂記錄完成！');
+  setSyncStatus('syncing');
+  upsertCloud(cur.t, cur.r, data);
+}
+function unmark(){
+  if(!cur)return;
+  const {t,r}=cur, n=D[t].find(x=>x.r===r).n;
+  delete rec[k(t,r)]; saveLocal(); closeMo(); renderAll();
+  showToast('已移除 '+n+' 的紀錄');
+  setSyncStatus('syncing');
+  deleteCloud(t, r);
+}
+
+// ── FILTERS & TABS ────────────────────────────────────────────────
+function setF(t,f,btn){
+  fil[t]=f;btn.parentElement.querySelectorAll('.fb').forEach(b=>b.classList.remove('active'));btn.classList.add('active');renderGrid(t);
+}
+function switchTab(name,btn){
+  document.querySelectorAll('.tpane').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tb').forEach(b=>{b.classList.remove('active');b.querySelector('.tbadge')?.classList.remove('active');});
+  document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active');
+  btn.querySelector('.tbadge')?.classList.add('active');
+  if(name==='mo')renderMonthly();
+}
+
+// ── PDF ───────────────────────────────────────────────────────────
+function exportPDF(t){
+  const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const climbed=D[t].filter(m=>!!rec[k(t,m.r)]),total=D[t].length,pct=Math.round(climbed.length/total*100);
+  const today=new Date().toLocaleDateString('zh-TW');
+  doc.setFillColor(45,74,62);doc.rect(0,0,210,36,'F');
+  doc.setTextColor(232,228,216);doc.setFontSize(20);doc.text(LABELS[t]+' 登山成就紀錄',14,16);
+  doc.setFontSize(10);doc.text(`完成：${climbed.length}/${total} 座（${pct}%）`,14,26);doc.text(`日期：${today}`,150,26);
+  doc.setFillColor(180,210,180);doc.rect(14,30,182,3,'F');
+  doc.setFillColor(74,103,65);doc.rect(14,30,182*climbed.length/total,3,'F');
+  let y=46;
+  if(!climbed.length){doc.setFontSize(12);doc.setTextColor(138,121,104);doc.text('尚無登頂紀錄',105,100,{align:'center'});}
+  else{
+    doc.setFillColor(242,242,238);doc.rect(14,y-4,182,8,'F');
+    doc.setFontSize(8.5);doc.setFont(undefined,'bold');doc.setTextColor(80,70,60);
+    doc.text('編號',16,y);doc.text('山名',30,y);doc.text('海拔',108,y);doc.text('縣市',128,y);doc.text('登頂日期',168,y);
+    y+=8;doc.setFont(undefined,'normal');
+    for(const[i,m]of climbed.entries()){
+      if(y>268){doc.addPage();y=20;doc.setFillColor(242,242,238);doc.rect(14,y-4,182,8,'F');doc.setFontSize(8.5);doc.setFont(undefined,'bold');doc.setTextColor(80,70,60);doc.text('編號',16,y);doc.text('山名',30,y);doc.text('海拔',108,y);doc.text('縣市',128,y);doc.text('登頂日期',168,y);y+=8;doc.setFont(undefined,'normal');}
+      if(i%2===0){doc.setFillColor(252,252,250);doc.rect(14,y-3.5,182,6.5,'F');}
+      const r2=rec[k(t,m.r)];
+      doc.setFontSize(8.5);doc.setTextColor(26,26,24);
+      doc.text('#'+String(m.r).padStart(2,'0'),16,y);
+      doc.text(m.n.substring(0,13),30,y);
+      doc.text(String(m.e),108,y);
+      doc.text((m.rg||'').substring(0,9),128,y);
+      doc.text(r2?.date||'—',168,y);
+      if(r2?.note){doc.setTextColor(138,121,104);doc.setFontSize(7);doc.text('備：'+r2.note.substring(0,28),30,y+4);doc.setTextColor(26,26,24);y+=3;}
+      y+=7;
+    }
+    if(y<268){y+=8;doc.setDrawColor(200,200,195);doc.line(14,y,196,y);y+=5;doc.setFontSize(8);doc.setTextColor(138,121,104);doc.text(`* 山岳成就紀錄 ・ 共 ${climbed.length} 座完登`,14,y);}
+  }
+  doc.save(LABELS[t]+'_'+today.replace(/\//g,'-')+'.pdf');showToast('📄 PDF 下載完成！');
+}
+
+function exportMonthlyPDF(){
+  const{jsPDF}=window.jspdf,doc=new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const today=new Date().toLocaleDateString('zh-TW'),allC=Object.keys(rec).length;
+  doc.setFillColor(45,74,62);doc.rect(0,0,210,36,'F');
+  doc.setTextColor(232,228,216);doc.setFontSize(18);doc.text(selY+' 年度登山成就報告',14,16);
+  doc.setFontSize(10);doc.text(`累計完登 ${allC} 座 ・ ${today}`,14,26);
+  let y=48;
+  for(const[t,lb]of Object.entries(LABELS)){
+    const cl=D[t].filter(m=>!!rec[k(t,m.r)]).length,tot=D[t].length,pct=Math.round(cl/tot*100);
+    doc.setFontSize(10);doc.setTextColor(26,26,24);doc.text(`${lb}：${cl}/${tot} 座（${pct}%）`,20,y);
+    doc.setFillColor(220,230,220);doc.rect(90,y-3.5,100,4,'F');
+    doc.setFillColor(74,103,65);doc.rect(90,y-3.5,100*cl/tot,4,'F');y+=10;
+  }
+  y+=4;doc.setFontSize(12);doc.setTextColor(45,74,62);doc.setFont(undefined,'bold');doc.text(selY+' 年每月紀錄',14,y);y+=8;doc.setFont(undefined,'normal');
+  for(let mo=1;mo<=12;mo++){
+    const items=[];
+    for(const[kk,r]of Object.entries(rec)){
+      if(!r.date)continue;const[yr,mn]=r.date.split('-');
+      if(+yr!==selY||+mn!==mo)continue;
+      const[t,rk]=kk.split('_');const mtn=D[t]?.find(x=>x.r==rk);items.push(mtn?.n||kk);
+    }
+    if(y>265){doc.addPage();y=20;}
+    doc.setFontSize(10);doc.setTextColor(45,74,62);doc.setFont(undefined,'bold');doc.text(`${MTC[mo-1]}（${items.length}座）`,14,y);doc.setFont(undefined,'normal');doc.setTextColor(26,26,24);
+    if(items.length){doc.setFontSize(9);const ln=doc.splitTextToSize(items.join('、'),152);doc.text(ln,55,y);y+=ln.length*5;}else y+=6;
+  }
+  doc.save(selY+'_年度報告_'+today.replace(/\//g,'-')+'.pdf');showToast('📄 年度報告 PDF 下載完成！');
+}
+
+// ── TOAST ─────────────────────────────────────────────────────────
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2800);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────
+function renderAll(){['h','s','m'].forEach(t=>{renderGrid(t);updProg(t);});}
+document.addEventListener('DOMContentLoaded',()=>{
+  // 先用本地快取即時渲染，再非同步拉雲端最新
+  renderAll();
+  setTimeout(()=>['h','s','m'].forEach(updProg),120);
+  loadFromCloud();
+});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeMo();});
+</script>
+</body>
+</html>
